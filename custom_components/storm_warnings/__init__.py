@@ -98,14 +98,26 @@ def matching(warnings, regions, now, lead, min_level="yellow", types=()):
     return out
 
 
+def highest_level(warnings):
+    return max((w["level"] for w in warnings), key=LEVELS.index, default="none")
+
+
+PLATFORMS = ["binary_sensor", "sensor"]
+
+
 async def async_setup_entry(hass, entry):
-    await hass.config_entries.async_forward_entry_setups(entry, ["binary_sensor"])
+    from .coordinator import StormCoordinator  # imported here so the parsing above stays testable without HA
+
+    coordinator = StormCoordinator(hass, entry)
+    await coordinator.async_config_entry_first_refresh()
+    entry.runtime_data = coordinator
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_reload))
     return True
 
 
 async def async_unload_entry(hass, entry):
-    return await hass.config_entries.async_unload_platforms(entry, ["binary_sensor"])
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def _reload(hass, entry):

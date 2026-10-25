@@ -51,6 +51,92 @@ internet outage during a storm will not take you out of backup. When the warning
 blueprint only switches back if the inverter is still in the backup mode, so a mode you set
 manually is left alone.
 
+## Inverter mode on your dashboard
+
+solax_modbus already exposes the mode as `select.solax_charger_use_mode`, so no extra code is
+needed. For a one-tap Backup / Self Use toggle, add a template switch to `configuration.yaml`
+and restart:
+
+```yaml
+template:
+  - switch:
+      - name: Inverter backup mode
+        unique_id: inverter_backup_mode
+        state: "{{ is_state('select.solax_charger_use_mode', 'Back Up Mode') }}"
+        icon: "{{ 'mdi:home-battery' if is_state('select.solax_charger_use_mode', 'Back Up Mode') else 'mdi:solar-power' }}"
+        turn_on:
+          - action: select.select_option
+            target:
+              entity_id: select.solax_charger_use_mode
+            data:
+              option: Back Up Mode
+        turn_off:
+          - action: select.select_option
+            target:
+              entity_id: select.solax_charger_use_mode
+            data:
+              option: Self Use Mode
+```
+
+Then add this card (dashboard > Edit > Add card > Manual). Replace `storm_warning_cork` with your
+entry's name; the integration creates `binary_sensor.<name>` and `sensor.<name>_level`.
+
+```yaml
+type: vertical-stack
+cards:
+  - type: tile
+    entity: select.solax_charger_use_mode
+    name: Inverter mode
+    features:
+      - type: select-options
+  - type: tile
+    entity: switch.inverter_backup_mode
+    features:
+      - type: toggle
+  # One tile per level; only the matching one is shown, coloured by the level.
+  - type: tile
+    entity: sensor.storm_warning_cork_level
+    name: Upcoming weather
+    color: white
+    visibility:
+      - condition: state
+        entity: sensor.storm_warning_cork_level
+        state_not: [yellow, orange, red]
+  - type: tile
+    entity: sensor.storm_warning_cork_level
+    name: Upcoming weather
+    color: yellow
+    visibility:
+      - condition: state
+        entity: sensor.storm_warning_cork_level
+        state: yellow
+  - type: tile
+    entity: sensor.storm_warning_cork_level
+    name: Upcoming weather
+    color: orange
+    visibility:
+      - condition: state
+        entity: sensor.storm_warning_cork_level
+        state: orange
+  - type: tile
+    entity: sensor.storm_warning_cork_level
+    name: Upcoming weather
+    color: red
+    visibility:
+      - condition: state
+        entity: sensor.storm_warning_cork_level
+        state: red
+```
+
+The first tile shows the current mode and lets you pick any mode. The toggle switches between
+Back Up Mode and Self Use Mode; it shows off for any other mode, such as Feedin Priority. The last
+tile shows the highest level among the matching warnings, using the same notice period and filters
+as the warning sensor, and its icon turns yellow, orange or red. With no warning it is white, which
+is hard to see on a light theme; use `color: grey` there if so.
+
+If you switch back to Self Use during a warning, the blueprint leaves it alone. It acts again
+only when the next warning starts.
+
 ## Severity
 
 Met Éireann and MeteoAlarm use yellow/orange/red directly. NWS severity is mapped:

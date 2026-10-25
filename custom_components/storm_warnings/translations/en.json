@@ -89,5 +89,17 @@
         "red": "Red"
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "level": {
+        "state": {
+          "none": "None",
+          "yellow": "Yellow",
+          "orange": "Orange",
+          "red": "Red"
+        }
+      }
+    }
   }
 }

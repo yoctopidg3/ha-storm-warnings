@@ -2,7 +2,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, "custom_components")
-from storm_warnings import matching, nearest_county, parse_meteoalarm, parse_nws
+from storm_warnings import highest_level, matching, nearest_county, parse_meteoalarm, parse_nws
 
 now = datetime(2026, 10, 25, 12, tzinfo=timezone.utc)
 day = timedelta(hours=24)
@@ -50,6 +50,10 @@ hww, surf = parse_nws(nws)
 assert (hww["level"], hww["expiry"]) == ("orange", at(30))                        # uses ends, not expires
 assert surf["level"] is None and surf["expiry"] == at(4) and surf["headline"] == "High Surf Advisory"
 assert matching([hww, surf], [], now, day, "yellow", types) == [hww]
+# highest level
+assert highest_level([]) == "none"
+assert highest_level([w(level="yellow"), w(level="red"), w(level="orange")]) == "red"
+
 # nearest county (setup default only)
 assert nearest_county(51.90, -8.47) == "EI04"   # Cork city
 assert nearest_county(53.27, -9.05) == "EI10"   # Galway city
