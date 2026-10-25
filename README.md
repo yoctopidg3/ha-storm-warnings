@@ -22,6 +22,8 @@ blueprint uses it to switch an inverter into backup mode (e.g. Solax via solax_m
 
 Copy `custom_components/storm_warnings` into your HA `config/custom_components/` and restart.
 
+The integration icon needs Home Assistant 2026.3 or later; older versions show a placeholder.
+
 ## Set up
 
 1. Settings > Devices & services > Add integration > **Storm Warnings**.
