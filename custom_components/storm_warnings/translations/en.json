@@ -1,0 +1,85 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Warning source",
+        "data": { "source": "Source" }
+      },
+      "met_eireann": {
+        "title": "Met Éireann",
+        "data": {
+          "regions": "Counties",
+          "lead_hours": "Hours of notice",
+          "min_level": "Minimum level",
+          "types": "Warning types"
+        },
+        "data_description": {
+          "lead_hours": "Turn on this many hours before a warning starts.",
+          "types": "Matched as text inside the warning type, so \"wind\" matches \"High Wind Warning\"."
+        }
+      },
+      "meteoalarm": {
+        "title": "MeteoAlarm",
+        "data": {
+          "country": "Country",
+          "regions": "Region codes",
+          "lead_hours": "Hours of notice",
+          "min_level": "Minimum level",
+          "types": "Warning types"
+        },
+        "data_description": {
+          "country": "As in the feed URL feeds.meteoalarm.org/api/v1/warnings/feeds-COUNTRY, e.g. ireland, united-kingdom, france.",
+          "regions": "EMMA_ID codes, comma separated. Find yours in your country's feed next to an areaDesc naming your area.",
+          "lead_hours": "Turn on this many hours before a warning starts.",
+          "types": "Matched as text inside the warning type, so \"wind\" matches \"High Wind Warning\"."
+        }
+      },
+      "nws": {
+        "title": "National Weather Service",
+        "data": {
+          "location": "Location",
+          "lead_hours": "Hours of notice",
+          "min_level": "Minimum level",
+          "types": "Warning types"
+        },
+        "data_description": {
+          "min_level": "NWS severity is mapped: Moderate = yellow, Severe = orange, Extreme = red.",
+          "lead_hours": "Turn on this many hours before a warning starts.",
+          "types": "Matched as text inside the event name, so \"wind\" matches \"High Wind Warning\"."
+        }
+      }
+    },
+    "error": {
+      "unknown_country": "MeteoAlarm has no feed for that country.",
+      "cannot_connect": "Could not reach MeteoAlarm.",
+      "no_regions": "Enter at least one region code."
+    },
+    "abort": {
+      "already_configured": "This area is already set up."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Warning filters",
+        "data": {
+          "lead_hours": "Hours of notice",
+          "min_level": "Minimum level",
+          "types": "Warning types"
+        }
+      }
+    }
+  },
+  "selector": {
+    "source": {
+      "options": {
+        "met_eireann": "Met Éireann (Ireland)",
+        "meteoalarm": "MeteoAlarm (Europe)",
+        "nws": "National Weather Service (US)"
+      }
+    },
+    "level": {
+      "options": { "yellow": "Yellow", "orange": "Orange", "red": "Red" }
+    }
+  }
+}

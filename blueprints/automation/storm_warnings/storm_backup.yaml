@@ -1,0 +1,51 @@
+blueprint:
+  name: Storm backup mode
+  description: >
+    While a storm warning sensor is on, set an inverter mode select (e.g. solax_modbus
+    "Charger Use Mode") to a backup option, and switch it back afterwards. When the warning
+    ends, it only switches back if the mode is still the backup option, so a mode you set
+    manually is left alone.
+  domain: automation
+  source_url: https://github.com/yoctopidg3/ha-storm-warnings/blob/main/blueprints/automation/storm_warnings/storm_backup.yaml
+  input:
+    warning:
+      name: Warning sensor
+      selector:
+        entity:
+          filter:
+            domain: binary_sensor
+    mode_select:
+      name: Inverter mode select
+      selector:
+        entity:
+          filter:
+            domain: select
+    storm_option:
+      name: Mode during warnings
+      default: Back Up Mode
+      selector:
+        text:
+    normal_option:
+      name: Normal mode
+      default: Self Use Mode
+      selector:
+        text:
+mode: queued
+variables:
+  mode_select: !input mode_select
+  storm_option: !input storm_option
+  normal_option: !input normal_option
+triggers:
+  - trigger: state
+    entity_id: !input warning
+    to: ["on", "off"]
+conditions:
+  - condition: template
+    value_template: >
+      {{ trigger.to_state.state == 'on' or is_state(mode_select, storm_option) }}
+actions:
+  - action: select.select_option
+    target:
+      entity_id: !input mode_select
+    data:
+      option: "{{ storm_option if trigger.to_state.state == 'on' else normal_option }}"
