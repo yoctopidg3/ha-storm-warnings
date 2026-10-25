@@ -3,7 +3,9 @@
     "step": {
       "user": {
         "title": "Warning source",
-        "data": { "source": "Source" }
+        "data": {
+          "source": "Source"
+        }
       },
       "met_eireann": {
         "title": "Met Éireann",
@@ -15,7 +17,8 @@
         },
         "data_description": {
           "lead_hours": "Turn on this many hours before a warning starts.",
-          "types": "Matched as text inside the warning type, so \"wind\" matches \"High Wind Warning\"."
+          "types": "Matched as text inside the warning type, so \"wind\" matches \"High Wind Warning\".",
+          "regions": "Pre-selected from your Home Assistant home location. Check it, as homes near a county border may get the neighbouring county."
         }
       },
       "meteoalarm": {
@@ -52,7 +55,8 @@
     "error": {
       "unknown_country": "MeteoAlarm has no feed for that country.",
       "cannot_connect": "Could not reach MeteoAlarm.",
-      "no_regions": "Enter at least one region code."
+      "no_regions": "Enter at least one region code.",
+      "no_counties": "Pick at least one county."
     },
     "abort": {
       "already_configured": "This area is already set up."
@@ -79,7 +83,11 @@
       }
     },
     "level": {
-      "options": { "yellow": "Yellow", "orange": "Orange", "red": "Red" }
+      "options": {
+        "yellow": "Yellow",
+        "orange": "Orange",
+        "red": "Red"
+      }
     }
   }
 }

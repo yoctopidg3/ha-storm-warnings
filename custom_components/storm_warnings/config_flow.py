@@ -7,16 +7,9 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from . import DOMAIN, LEVELS, PARSERS, feed_url
+from . import COUNTIES, DOMAIN, LEVELS, PARSERS, feed_url, nearest_county
 
 DEFAULT_TYPES = ["wind", "rain", "thunder", "snow", "ice", "storm", "tornado", "hurricane", "blizzard", "winter"]
-COUNTIES = {
-    "EI01": "Carlow", "EI02": "Cavan", "EI03": "Clare", "EI04": "Cork", "EI06": "Donegal", "EI07": "Dublin",
-    "EI10": "Galway", "EI11": "Kerry", "EI12": "Kildare", "EI13": "Kilkenny", "EI14": "Leitrim", "EI15": "Laois",
-    "EI16": "Limerick", "EI18": "Longford", "EI19": "Louth", "EI20": "Mayo", "EI21": "Meath", "EI22": "Monaghan",
-    "EI23": "Offaly", "EI24": "Roscommon", "EI25": "Sligo", "EI26": "Tipperary", "EI27": "Waterford",
-    "EI29": "Westmeath", "EI30": "Wexford", "EI31": "Wicklow",
-}
 
 
 def _filters_schema(current):
@@ -55,20 +48,26 @@ class StormWarningsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(step_id="user", data_schema=schema)
 
     async def async_step_met_eireann(self, user_input=None):
+        errors = {}
         if user_input is not None:
             regions = sorted(user_input["regions"])
-            title = "Storm warning " + ", ".join(COUNTIES[r] for r in regions)
-            return await self._create(title, f"met_eireann:{','.join(regions)}", {**user_input, "regions": regions})
-        counties = [selector.SelectOptionDict(value=k, label=v) for k, v in sorted(COUNTIES.items(), key=lambda kv: kv[1])]
+            if regions:
+                title = "Storm warning " + ", ".join(COUNTIES[r][0] for r in regions)
+                return await self._create(title, f"met_eireann:{','.join(regions)}", {**user_input, "regions": regions})
+            errors["regions"] = "no_counties"
+        counties = [
+            selector.SelectOptionDict(value=k, label=v[0]) for k, v in sorted(COUNTIES.items(), key=lambda kv: kv[1])
+        ]
+        home = nearest_county(self.hass.config.latitude, self.hass.config.longitude)
         schema = vol.Schema(
             {
-                vol.Required("regions"): selector.SelectSelector(
+                vol.Required("regions", default=[home] if home else []): selector.SelectSelector(
                     selector.SelectSelectorConfig(options=counties, multiple=True)
                 ),
                 **_filters_schema({}),
             }
         )
-        return self.async_show_form(step_id="met_eireann", data_schema=schema)
+        return self.async_show_form(step_id="met_eireann", data_schema=schema, errors=errors)
 
     async def async_step_meteoalarm(self, user_input=None):
         errors = {}

@@ -4,8 +4,31 @@ Feed parsing and matching live here, free of Home Assistant imports, so they can
 Every source is normalised to: {level, type, regions, onset, expiry, headline}.
 """
 from datetime import datetime
+import math
 
 DOMAIN = "storm_warnings"
+
+# Met Éireann county codes: (name, approximate centre lat, lon)
+COUNTIES = {
+    "EI01": ("Carlow", 52.72, -6.84), "EI02": ("Cavan", 53.99, -7.36), "EI03": ("Clare", 52.90, -9.00),
+    "EI04": ("Cork", 51.95, -8.75), "EI06": ("Donegal", 54.90, -8.00), "EI07": ("Dublin", 53.35, -6.27),
+    "EI10": ("Galway", 53.35, -8.90), "EI11": ("Kerry", 52.10, -9.65), "EI12": ("Kildare", 53.20, -6.80),
+    "EI13": ("Kilkenny", 52.58, -7.22), "EI14": ("Leitrim", 54.10, -8.00), "EI15": ("Laois", 53.00, -7.40),
+    "EI16": ("Limerick", 52.50, -8.75), "EI18": ("Longford", 53.73, -7.70), "EI19": ("Louth", 53.92, -6.48),
+    "EI20": ("Mayo", 53.90, -9.30), "EI21": ("Meath", 53.62, -6.70), "EI22": ("Monaghan", 54.15, -6.95),
+    "EI23": ("Offaly", 53.20, -7.60), "EI24": ("Roscommon", 53.70, -8.20), "EI25": ("Sligo", 54.15, -8.60),
+    "EI26": ("Tipperary", 52.65, -7.90), "EI27": ("Waterford", 52.20, -7.60), "EI29": ("Westmeath", 53.55, -7.45),
+    "EI30": ("Wexford", 52.45, -6.60), "EI31": ("Wicklow", 53.00, -6.40),
+}
+
+
+def nearest_county(lat, lon):
+    """Best-guess county code for a point in Ireland, or None outside it. Only used as a setup default."""
+    # ponytail: nearest county centre, can pick a neighbour near borders; use county polygons if that matters
+    if not (51.3 <= lat <= 55.5 and -10.7 <= lon <= -5.9):
+        return None
+    k = math.cos(math.radians(lat))
+    return min(COUNTIES, key=lambda c: (COUNTIES[c][1] - lat) ** 2 + ((COUNTIES[c][2] - lon) * k) ** 2)
 
 LEVELS = ["yellow", "orange", "red"]
 CAP_LEVELS = {"Moderate": "yellow", "Severe": "orange", "Extreme": "red"}
